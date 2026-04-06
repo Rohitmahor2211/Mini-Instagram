@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, Controller } from 'react-hook-form'
 import { NavLink, useNavigate } from 'react-router-dom'
 import api from '../api/api'
-
+import { ToastContainer, toast } from 'react-toastify';
 
 const SignUp_form = () => {
 
@@ -28,18 +28,17 @@ const SignUp_form = () => {
     }
   })
 
+  const notify = () => toast("Request is processing...")
+
+
   const form_data = async (data) => {
+    console.log(data)
     setLoading(true)
+    notify()
     try {
       const response = await api.post('/signup', data)
       console.log(response)
-      setLoading((prev) => (!prev))
-
-      if (response.status == 200) {
-        alert("User Alrady Registred..!")
-        reset()
-      }
-
+      setLoading(false)
 
       if (response.status === 201) {
         const jwt_token = response.data.jwt_token
@@ -49,14 +48,20 @@ const SignUp_form = () => {
       }
     }
     catch (error) {
+      setLoading(false)
       console.error(error)
+      if (error.response && error.response.status === 409) {
+        toast.error("User Already Registered!");
+      } else {
+        toast.error(error.response?.data?.message || "Something went wrong!");
+      }
     }
   }
 
 
   return (
-    <div className="w-full max-w-2xl px-4 py-8">
-      <div className="bg-[#242427] border border-gray-800 shadow-2xl rounded-3xl p-8 md:p-12 transition-all hover:border-brand/30">
+    <div className="w-full max-w-2xl px-4 py-8 mx-auto">
+      <div className="bg-[#242427] border border-gray-800 shadow-2xl rounded-3xl p-6 sm:p-8 md:p-12 transition-all hover:border-brand/30">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-extrabold bg-linear-to-r from-brand-soft via-brand to-brand-strong bg-clip-text text-transparent mb-3 tracking-tighter">
             Create Account
@@ -123,7 +128,7 @@ const SignUp_form = () => {
           {/* Birthday */}
           <div className="space-y-4">
             <label className="text-xs font-bold uppercase tracking-widest px-1 text-gray-500">Birthday</label>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {/* Month */}
               <div className="space-y-2 ">
                 <Controller

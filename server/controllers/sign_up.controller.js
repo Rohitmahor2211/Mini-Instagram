@@ -9,8 +9,8 @@ const sign_up = async (req, res) => {
 
     let existing_user = await userSchema.findOne({ email })
     if (existing_user && existing_user.isVerified) {
-        return res.status(200).json({
-            message: "user alrady registered..!"
+        return res.status(409).json({
+            message: "User already registered..!"
         })
     }
 
@@ -33,7 +33,7 @@ const sign_up = async (req, res) => {
     const token = jwt.sign(
         { userId: existing_user._id },
         process.env.JWT_secret,
-        { expiresIn: "10d" }
+        { expiresIn: "1d" }
     )
 
     try {

@@ -5,6 +5,8 @@ import Login_page from '../pages/Login_page'
 import Varification_page from '../pages/Varification_page'
 import User_profile_page from '../pages/User_profile_page'
 import Route_protection from './Route_protection'
+import Dashboard_page from '../pages/Dashboard_page'
+import Dashboard_protaction from './Dashboard_protaction'
 
 const Routing = () => {
   return (
@@ -22,6 +24,13 @@ const Routing = () => {
           <Route_protection>
             <User_profile_page />
           </Route_protection>
+        } />
+
+
+        <Route path='/dashboard' element={
+          <Dashboard_protaction>
+            <Dashboard_page />
+          </Dashboard_protaction>
         } />
       </Routes>
     </>

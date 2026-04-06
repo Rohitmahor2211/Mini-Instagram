@@ -15,15 +15,59 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { LogIn } from "lucide-react"
-import { NavLink } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
+import { useContext, useState } from "react"
+import api from "../api/api"
+import { userContext } from "../context/User_context"
+import { toast } from "react-toastify"
+
 
 export function LoginForm({
-    className,
-    ...props
+    className, ...props
 }) {
+
+    const navigate = useNavigate()
+    const { setUser, SetMyID, setDeshboardOpen } = useContext(userContext)
+
+    const [data, setData] = useState({
+        email: "",
+        password: ""
+    })
+
+    const handleChange = (e) => {
+        const { name, value } = e.target
+        setData((prev) => ({
+            ...prev,
+            [name]: value
+        }))
+    }
+
+
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        try {
+            const response = await api.post('/login', data)
+            console.log(response)
+            if (response.status == 200) {
+                toast.success("Login Successful!");
+                setUser(true)
+                SetMyID(response.data.user._id)
+                setDeshboardOpen(true)
+                navigate('/dashboard')
+            }
+        } catch (error) {
+            console.error(error)
+            toast.error(error.response?.data?.message || "Invalid credentials. Please try again.");
+            setDeshboardOpen(false)
+        }
+    }
+
+
+
+
     return (
-        <div className={cn("flex flex-col gap-6 w-[24%] ", className)} {...props}>
-            <Card className="py-6 h-[60vh]">
+        <div className={cn("flex flex-col gap-6 w-full px-4 sm:px-0 sm:w-[350px] md:w-[400px] lg:w-[30%] xl:w-[24%] mx-auto", className)} {...props}>
+            <Card className="py-6 min-h-[60vh] h-auto">
                 <CardHeader>
                     <div className="flex justify-center ">
                         <div className="w-12 py-2.5 bg-zinc-100 rounded-sm flex justify-center ">
@@ -36,7 +80,9 @@ export function LoginForm({
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form className="pt-6">
+                    <form
+                        onSubmit={handleSubmit}
+                        className="pt-6">
                         <FieldGroup>
                             <Field>
                                 <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -45,6 +91,9 @@ export function LoginForm({
                                     type="email"
                                     placeholder="m@example.com"
                                     required
+                                    name="email"
+                                    value={data.email}
+                                    onChange={handleChange}
                                 />
                             </Field>
                             <Field>
@@ -57,7 +106,11 @@ export function LoginForm({
                                         Forgot your password?
                                     </a>
                                 </div>
-                                <Input id="password" type="password" required />
+                                <Input id="password" type="password" required
+                                    name="password"
+                                    value={data.password}
+                                    onChange={handleChange}
+                                />
                             </Field>
                             <Field className="mt-6 ">
                                 <Button type="submit" className="cursor-pointer">Login</Button>

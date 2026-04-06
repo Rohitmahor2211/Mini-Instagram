@@ -3,6 +3,7 @@ import { Camera, User, Lock, Eye, EyeOff } from 'lucide-react';
 import api from '../api/api';
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const User_profile = () => {
     const [profilePicSrc, setProfilePicSrc] = useState(null);
@@ -71,6 +72,7 @@ const User_profile = () => {
             }
 
             if (response.status == 200) {
+                toast.success("Profile created successfully!");
                 navigate('/login')
                 setloading(false)
                 localStorage.removeItem("token")
@@ -86,10 +88,20 @@ const User_profile = () => {
             if (fileInputRef.current) {
                 fileInputRef.current.value = "";
             }
-            console.log(response)
+            // console.log(response)
         } catch (error) {
-            console.log("error :- ", error);
+            console.error("error :- ", error);
+            setFormData({
+                profileImage: null,
+                profileName: "",
+                password: ""
+            })
+            if (error.status == 404) {
+                return toast.error("Profile Pic Not Valid")
+            }
+            toast.error("Failed to create profile. Please try again.");
             setloading(false);
+
         }
 
     }

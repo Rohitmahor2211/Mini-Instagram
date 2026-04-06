@@ -2,9 +2,12 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
+import User_context from './context/User_context.jsx'
 
 createRoot(document.getElementById('root')).render(
-    <BrowserRouter>
-        <App />
-    </BrowserRouter>
+    <User_context>
+        <BrowserRouter>
+            <App />
+        </BrowserRouter>
+    </User_context>
 )

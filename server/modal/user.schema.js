@@ -61,6 +61,9 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  profileName: { type: String, unique: true },
+  password: String,
+  profilePic: String,
 
 }, {
   timestamps: true

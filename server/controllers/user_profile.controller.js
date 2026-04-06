@@ -4,7 +4,7 @@ const fs = require('fs')
 const fileSchema = require('../modal/fileSchema.zod')
 const cloudinary = require('../config/cloudinary')
 const bcrypt = require('bcrypt')
-const profileSchema = require('../modal/profile.schema')
+const userSchema = require('../modal/user.schema')
 
 
 const user_profile = async (req, res) => {
@@ -18,40 +18,52 @@ const user_profile = async (req, res) => {
     }
 
     try {
-        const validateFile = fileSchema.parse(file)
-        console.log("File received and validated:", validateFile.originalname);
+        const exesting_profile = await userSchema.findById(userId);
 
-        const cloudinary_response = await cloudinary.uploader.upload(req.file.path, {
-            folder: "instagram" // Folder name in Cloudinary
-        })
-        fs.unlinkSync(req.file.path)
-
-        const exesting_profile = await profileSchema.findOne({ profileName })
-
-        if (exesting_profile) {
-            return res.status(400).json({
-                message: "profile already exists..!"
-            })
+        if (!exesting_profile) {
+            return res.status(404).json({ message: "User not found" });
         }
 
-
-        const hashPassword = await bcrypt.hash(password, 10)
-        try {
-            const response = await profileSchema.create({
-                userId, profileName, password: hashPassword, profilePic: cloudinary_response.secure_url
-            })
-
-            console.log(response)
-            return res.status(200).json({
-                message: "user profile created successfully..! 🚀",
-                user: profileName,
-                imageUrl: cloudinary_response.secure_url
+        if (exesting_profile.profileName === profileName) {
+            return res.status(400).json({
+                message: "profile already exists..!"
             });
-        } catch (error) {
-            return res.status(404).json({
-                message: "user profile not created..!",
-                error: error.message
+
+        } else {
+
+            const validateFile = fileSchema.parse(file)
+            console.log("File received and validated:", validateFile.originalname);
+            if (!validateFile) {
+                return res.status(404).json({
+                    message: "file in not valide formet..!"
+                })
+            }
+
+            const cloudinary_response = await cloudinary.uploader.upload(req.file.path, {
+                folder: "instagram" // Folder name in Cloudinary
             })
+            fs.unlinkSync(req.file.path)
+
+            const hashPassword = await bcrypt.hash(password, 10);
+            try {
+                exesting_profile.profileName = profileName;
+                exesting_profile.password = hashPassword;
+                exesting_profile.profilePic = cloudinary_response.secure_url;
+
+                await exesting_profile.save();
+
+                console.log(exesting_profile);
+                return res.status(200).json({
+                    message: "user profile created successfully..! 🚀",
+                    user: profileName,
+                    imageUrl: cloudinary_response.secure_url
+                });
+            } catch (error) {
+                return res.status(400).json({
+                    message: "user profile not created..!",
+                    error: error.message
+                });
+            }
         }
     }
     catch (error) {
@@ -67,7 +79,6 @@ const user_profile = async (req, res) => {
         }
         res.status(500).json({ error: "Something went wrong" });
     }
-    // console.log("Saving file to database path:", file.path);
 
 };
 
