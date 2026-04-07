@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const userSchema = require('../server/modal/user.schema');
-require('dotenv').config({ path: '../server/.env' });
+const userSchema = require('../modal/user.schema');
+require('dotenv').config({ path: '../.env' });
 
 async function testBlocking() {
     try {
