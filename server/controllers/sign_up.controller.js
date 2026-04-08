@@ -1,4 +1,4 @@
-const transporter = require('../config/email');
+// const transporter = require('../config/email');
 const otp = require('./otp')
 const userSchema = require('../modal/user.schema')
 const jwt = require('jsonwebtoken')
@@ -47,25 +47,28 @@ const sign_up = async (req, res) => {
     )
 
     try {
-        const info = await transporter.sendMail({
-            from: `Example Team" <${process.env.Email_user_account}>`,
-            to: `${email}`,
-            subject: "Account Verification Email",
-            text: "Email verification OTP",
-            html: `<div style="font-weight:600; text-align:center; font-size:25px;">${code}</div>`,
+        await mg.messages.create(process.env.MAILGUN_DOMAIN, {
+            from: `Chat App <mailgun@${process.env.MAILGUN_DOMAIN}>`,
+            to: [email],
+            subject: "Account Verification OTP",
+            text: "Your OTP code",
+            html: `<div style="font-size:25px;text-align:center;font-weight:600;">${code}</div>`,
         });
 
-        console.log("Message sent: %s", info.messageId);
+        console.log("Email sent successfully");
+
+        await existing_user.save(); // 👈 after email success
 
         return res.status(201).json({
             message: "User Created..! Verification email sent. 🚀",
             jwt_token: token
-        })
+        });
 
     } catch (err) {
         console.error("Error while sending mail:", err);
+
         return res.status(500).json({
-            message: "Failed to send verification email. Please try again later."
+            message: "Email failed. User not created."
         });
     }
 }
