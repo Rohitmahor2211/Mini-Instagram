@@ -2,6 +2,7 @@
 const otp = require('./otp')
 const userSchema = require('../modal/user.schema')
 const jwt = require('jsonwebtoken')
+const mg = require('../config/email')
 
 const sign_up = async (req, res) => {
     console.log("Full Request Body:", req.body); // 👈 Debugging log
