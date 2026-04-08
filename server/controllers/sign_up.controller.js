@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken')
 const sign_up = async (req, res) => {
     const { name, email, mobile, age, day, month, year, city, country, policy } = req.body;
     const code = otp()
+    console.log(email, otp)
 
     let existing_user = await userSchema.findOne({ email })
     if (existing_user && existing_user.isVerified) {
@@ -42,19 +43,22 @@ const sign_up = async (req, res) => {
             to: `${email}`,
             subject: "Account Verification Email",
             text: "Email verification OTP",
-            html: `<div style="font-weight:600; text-align:center; font-size:"25px";>${code}</div>`,
+            html: `<div style="font-weight:600; text-align:center; font-size:25px;">${code}</div>`,
         });
 
-        // console.log("Message sent: %s", info.messageId);
-    } catch (err) {
-        // console.error("Error while sending mail:", err);
-    }
+        console.log("Message sent: %s", info.messageId);
 
-    res.status(201).json({
-        message: "User Creataed..!",
-        status: res.status,
-        jwt_token: token
-    })
+        return res.status(201).json({
+            message: "User Created..! Verification email sent. 🚀",
+            jwt_token: token
+        })
+
+    } catch (err) {
+        console.error("Error while sending mail:", err);
+        return res.status(500).json({
+            message: "Failed to send verification email. Please try again later."
+        });
+    }
 }
 
 

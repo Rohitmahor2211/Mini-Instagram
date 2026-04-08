@@ -790,7 +790,7 @@ export default function Dashboard() {
 
                                         {/* Text */}
                                         {msg.text && (
-                                            <p className="text-[13px] leading-relaxed break-words whitespace-pre-wrap">{msg.text}</p>
+                                            <p className="text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap">{msg.text}</p>
                                         )}
 
                                         {/* Time & Status */}

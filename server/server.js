@@ -15,17 +15,31 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(cookieParser());
 
-const allowedOrigin = process.env.CLIENT_URL || "http://localhost:5173";
+const allowedOrigins = [
+    process.env.CLIENT_URL,       // production (vercel)
+    process.env.CLIENT_URL_DEV,   // local frontend
+    "http://localhost:5173",
+    "http://localhost:5000"
+];
 
 app.use(cors({
-    origin: allowedOrigin,
+    origin: function (origin, callback) {
+        console.log("Request Origin:", origin); // 👈 debug
+
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.log("Blocked by CORS:", origin);
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     credentials: true
 }));
 
 const server = http.createServer(app)
 const io = new Server(server, {
     cors: {
-        origin: allowedOrigin,
+        origin: allowedOrigins,
         credentials: true,
         methods: ["GET", "POST"]
     }
@@ -76,15 +90,8 @@ app.set("users", users);
 
 app.use('/', router);
 
-// Serve Frontend in Production
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../client/dist')));
-    app.get('*', (req, res) => {
-        res.sendFile(path.resolve(__dirname, '../client', 'dist', 'index.html'));
-    });
-}
 
 db_connection()
 server.listen(PORT, () => {
-    // console.log('Server is running on PORT', PORT)
+    console.log('Server is running on PORT', PORT)
 })
