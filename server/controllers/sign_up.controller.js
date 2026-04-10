@@ -61,7 +61,7 @@ const sign_up = async (req, res) => {
             to: `${email}`,
             subject: "Account Verification Email",
             text: "Email verification OTP",
-            html: <div style="font - weight: 600; text- align: center; font - size: 25px; ">${code}</div>,
+            html: `<div style="font - weight: 600; text- align: center; font - size: 25px; ">${code}</div>`,
         });
         console.log("Message sent: % s", info.messageId);
         console.log("Email sent successfully");
