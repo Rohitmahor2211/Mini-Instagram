@@ -101,7 +101,7 @@ app.get("/test", (req, res) => {
     res.send("OK");
 });
 
-app.get('*', (req, res) => {
+app.get('*all', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
