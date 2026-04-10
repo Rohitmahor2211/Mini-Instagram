@@ -1,11 +1,11 @@
 const { z } = require("zod")
-const path = require("path")
+// const path = require("path")
 const fs = require('fs')
 const fileSchema = require('../modal/fileSchema.zod')
 const cloudinary = require('../config/cloudinary')
 const bcrypt = require('bcrypt')
 const userSchema = require('../modal/user.schema')
-
+const streamifier = require("streamifier");
 
 const user_profile = async (req, res) => {
     const userId = req.user.userId;
@@ -40,11 +40,21 @@ const user_profile = async (req, res) => {
 
         let cloudinary_url = existing_profile.profilePic;
         if (file) {
-            const cloudinary_response = await cloudinary.uploader.upload(file.path, {
-                folder: "chat-application"
-            })
-            cloudinary_url = cloudinary_response.secure_url;
-            fs.unlinkSync(file.path)
+            const uploadFromBuffer = () => {
+                return new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream(
+                        { folder: "chat-application" },
+                        (error, result) => {
+                            if (result) resolve(result);
+                            else reject(error);
+                        }
+                    );
+                    streamifier.createReadStream(file.buffer).pipe(stream);
+                });
+            };
+
+            const result = await uploadFromBuffer();
+            cloudinary_url = result.secure_url;
         }
 
         const hashPassword = password ? await bcrypt.hash(password, 10) : existing_profile.password;
@@ -62,15 +72,6 @@ const user_profile = async (req, res) => {
         });
     }
     catch (error) {
-        if (file && file.path) {
-            fs.unlink(file.path, (err) => {
-                if (err) console.error("Error deleting invalid file:", err);
-                else {
-                    // console.log("Successfully deleted invalid upload:", file.path);
-                }
-            });
-        }
-
         if (error instanceof z.ZodError) {
             return res.status(400).json({ errors: error.errors, message: "Validation failed" });
         }
