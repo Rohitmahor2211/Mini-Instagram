@@ -14,7 +14,7 @@ const Routing = () => {
       <Routes>
         <Route path='/' element={<Sign_Up_page />} />
         <Route path='/login' element={<Login_page />} />
-
+        {/* <Route path='/verification-page' element={<Varification_page />} /> */}
         <Route path='/verification-page' element={
           <Route_protection>
             <Varification_page />

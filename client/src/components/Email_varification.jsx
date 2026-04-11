@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 
 
 const Email_varification = () => {
+    const [loading, setLoading] = useState(false)
     const token = localStorage.getItem("token")
     const navigate = useNavigate()
 
@@ -42,6 +43,7 @@ const Email_varification = () => {
         if (code.length === 6) {
             setOtp(new Array(6).fill(""))
             inputRefs.current[0].focus()
+            setLoading(true)
 
             try {
                 const response = await api.post("/verify-otp",
@@ -55,6 +57,7 @@ const Email_varification = () => {
 
                 if (response) {
                     navigate('/user-profile')
+                    setLoading(false)
                 }
             }
             catch (error) {
@@ -86,12 +89,18 @@ const Email_varification = () => {
             {/* Cinematic background elements */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-600/30 rounded-full blur-[120px] mix-blend-screen pointer-events-none disabled:select-none"></div>
             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/30 rounded-full blur-[120px] mix-blend-screen pointer-events-none disabled:select-none"></div>
-            
+
             {/* Main Card */}
             <div className='relative w-full max-w-md p-8 sm:p-10 rounded-[2rem] bg-white/5 backdrop-blur-2xl border border-white/10 shadow-2xl z-10 m-4 flex flex-col items-center'>
                 <div className="text-center mb-8">
                     <h1 className='text-3xl font-extrabold bg-linear-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-2 tracking-tight'>Verify Email</h1>
-                    <p className='text-zinc-400 text-sm font-medium'>We've sent a code. Enter it below.</p>
+                    <p className='text-zinc-400 text-sm font-medium'>We've sent a code. Enter it below.
+                    </p>
+                    <div className='flex flex-col  items-start pt-2 text-white text-sm'>
+                        <p><span className='text-red-800 text-lg'>* </span>If you don’t receive it within a minute:</p>
+                        <p className='pl-6'>• Check your Spam or Junk folder</p>
+                        <p className='pl-6'>• Make sure you entered the correct email</p>
+                    </div>
                 </div>
 
                 <div className='flex justify-center gap-2 sm:gap-3 py-6 w-full'>
@@ -111,12 +120,12 @@ const Email_varification = () => {
                         })
                     }
                 </div>
-                
+
                 <button
                     onClick={handleSubmit}
                     className="w-full mt-6 py-3.5 px-4 bg-linear-to-r from-purple-600 via-fuchsia-600 to-pink-600 hover:from-purple-500 hover:via-fuchsia-500 hover:to-pink-500 text-white font-bold rounded-2xl shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.5)] transform hover:-translate-y-0.5 transition-all duration-300 group overflow-hidden relative flex justify-center items-center gap-3">
                     <span className="relative z-10 flex items-center justify-center gap-2">
-                        Continue <Navigation2 className='rotate-90 w-5 h-5' />
+                        {loading ? "Verifying" : "Continue"} <Navigation2 className='rotate-90 w-5 h-5' />
                     </span>
                     <div className="absolute inset-0 h-full w-full bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out"></div>
                 </button>
